@@ -95,7 +95,7 @@ public class Mojo extends AbstractMojo {
     /**
      * @parameter property="jshint.version"
      */
-    private String version = "2.5.6";
+    private String version = "2.6.3";
 	
 	/**
 	 * @parameter 
