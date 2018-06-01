@@ -95,6 +95,10 @@
             <name>Stu Penrose</name>
             <email>stu@penrose.us</email>
         </developer>
+		<developer>
+			<id>Sebl29</id>
+			<email>Sebl29@github.com</email>
+		</developer>
     </developers>
     <!--   END: STUFF REQUIRED BY THE CENTRAL REPO -->
 </project>

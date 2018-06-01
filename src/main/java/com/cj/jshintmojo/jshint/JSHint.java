@@ -7,6 +7,7 @@ import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.NativeArray;
 import java.io.IOException;
 import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.ScriptableObject;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -47,8 +48,8 @@ public class JSHint {
         return minusShebang;
     }
 
-    public List<Error> run (InputStream source, String options, String globals) {
-        final List<Error> results = new ArrayList<JSHint.Error> ();
+    public List<Hint> run(final InputStream source, final String options, final String globals) {
+        final List<Hint> results = new ArrayList<JSHint.Hint>();
 
         String sourceAsText = toString (source);
 
@@ -61,17 +62,19 @@ public class JSHint {
             NativeArray errors = rhino.eval ("JSHINT.errors");
 
             for (Object next : errors) {
-                if (next != null) { // sometimes it seems that the last error in the list is null
-                    Error error = new Error (new JSObject (next));
-                    results.add (error);
+                if(next != null){ // sometimes it seems that the last error in the list is null
+                    JSObject jso = new JSObject(next);
+                    if (jso.dot("id").toString().equals("(error)")) {
+                        results.add(Hint.createHint(jso));
                 }
             }
+        }
         }
 
         return results;
     }
 
-    private NativeObject toJsObject (String options) {
+    private NativeObject toJsObject(final String options) {
         NativeObject nativeOptions = new NativeObject ();
         for (final String nextOption : options.split (",")) {
             final String option = nextOption.trim ();
@@ -96,13 +99,13 @@ public class JSHint {
                         value = rest;
                     }
                 }
-                nativeOptions.defineProperty (name, value, NativeObject.READONLY);
+                nativeOptions.defineProperty(name, value, ScriptableObject.READONLY);
             }
         }
         return nativeOptions;
     }
 
-    private static String toString (InputStream in) {
+    private static String toString(final InputStream in) {
         try {
             return IOUtils.toString (in, CharEncoding.UTF_8);
         } catch (Exception e) {
@@ -110,30 +113,31 @@ public class JSHint {
         }
     }
 
-    private String resourceAsString (String name) {
+    private String resourceAsString(final String name) {
         return toString (getClass ().getResourceAsStream (name));
     }
 
-    @SuppressWarnings ("unchecked")
+    @SuppressWarnings("unchecked")
     static class JSObject {
-        private NativeObject a;
+        private final NativeObject a;
 
-        public JSObject (Object o) {
-            if (o == null) throw new NullPointerException ();
+        public JSObject(final Object o) {
+            if(o==null) {
+                throw new NullPointerException();
+            }
             this.a = (NativeObject) o;
         }
 
-        public <T> T dot (String name) {
+        public <T> T dot(final String name){
             return (T) a.get (name);
         }
     }
 
-    @SuppressWarnings ("serial")
-    public static class Error implements Serializable {
+    public static abstract class Hint {
         public String id, code, raw, evidence, reason;
         public Number line, character;
 
-        public Error (JSObject o) {
+        public Hint(final JSObject o) {
             id = nullSafeToString (o, "id");
             code = nullSafeToString (o, "code");
             raw = nullSafeToString (o, "raw");
@@ -143,12 +147,75 @@ public class JSHint {
             reason = nullSafeToString (o, "reason");
         }
 
-        private String nullSafeToString (JSObject o, String name) {
+        public Hint() { }
+        
+        public String printLogMessage() {
+            String line = (this.line != null) ? String.valueOf(this.line.intValue()) : "";
+            String character = (this.character != null) ? String.valueOf(this.character.intValue()) : "";
+            return "   " + line + "," + character + ": " + this.reason + " \t(" + this.code + ")";
+        }
+        
+        public static Hint createHint(final JSObject jso) {
+            if (jso == null)
+            	throw new IllegalArgumentException();
+            String code = (String)jso.dot("code");
+            
+            char c = code.charAt(0);
+            Hint hint;
+            switch (c) {
+                case 'E':
+                    hint = new Error(jso);
+                    break;
+                case 'W':
+                    hint = new Warning(jso);
+                    break;
+                case 'I':
+                    hint = new Info(jso);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected char c=" + c);
+            }
+            return hint;
+        }
+
+    }
+
+    private static String nullSafeToString (JSObject o, String name) {
             return o.dot (name) != null ? o.dot (name).toString () : "";
+        }
+    
+    @SuppressWarnings("serial")
+    public static class Warning extends Hint implements Serializable {
+
+        public Warning(final JSObject o) {
+            super(o);
+        }
+
+        
+
+        // NOTE: for Unit Testing purpose.
+        public Warning() { }
+        }
+
+    @SuppressWarnings("serial")
+    public static class Error extends Hint implements Serializable {
+
+        public Error(final JSObject o) {
+            super(o);
+    }
+
+        // NOTE: for Unit Testing purpose.
+        public Error() { }
+}
+    
+    @SuppressWarnings("serial")
+    public static class Info extends Hint implements Serializable {
+
+        public Info(final JSObject o) {
+            super(o);
         }
 
         // NOTE: for Unit Testing purpose.
-        public Error () {
-        }
+        public Info() { }
     }
 }

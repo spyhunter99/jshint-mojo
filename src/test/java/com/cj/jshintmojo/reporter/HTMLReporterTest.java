@@ -47,7 +47,7 @@ public class HTMLReporterTest {
         		"<div style=\"margin-left:20px;margin-bottom:1em;font-size:11pt;font-family:consolas;\"><p>    &amp;&amp; window.setImmediate;</p></div>" +
         		"\t\t<div style=\"background-color:#2956B2;color:white;padding:4px\">" +
         		"<span style=\"padding-right:40px;padding-left:4px;\">line:1137 char:26</span>" +
-        		"<span style=\"font-weight:bold;padding-right:50px;\">Too many errors.</span></div>" +
+        		"<span style=\"font-weight:bold;padding-right:50px;\">Too many hints.</span></div>" +
         		"<div style=\"margin-left:20px;margin-bottom:1em;font-size:11pt;font-family:consolas;\"><p></p></div></html>\n"));
     }
 
@@ -68,7 +68,7 @@ public class HTMLReporterTest {
         		+ "<div style=\"margin-left:20px;margin-bottom:1em;font-size:11pt;font-family:consolas;\"><p>    &amp;&amp; window.setImmediate;</p></div>"
         		+ "\t\t<div style=\"background-color:#2956B2;color:white;padding:4px\">"
         		+ "<span style=\"padding-right:40px;padding-left:4px;\">line:1137 char:26</span>"
-        		+ "<span style=\"font-weight:bold;padding-right:50px;\">Too many errors.</span></div>"
+        		+ "<span style=\"font-weight:bold;padding-right:50px;\">Too many hints.</span></div>"
         		+ "<div style=\"margin-left:20px;margin-bottom:1em;font-size:11pt;font-family:consolas;\"><p></p></div>"
         		+ "<h2>/path/to/B.js</h2>\n"
         		+ "\t\t<div style=\"background-color:#2956B2;color:white;padding:4px\">"

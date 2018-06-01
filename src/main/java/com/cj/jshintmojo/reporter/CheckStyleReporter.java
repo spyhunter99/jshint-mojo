@@ -7,7 +7,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
 import com.cj.jshintmojo.cache.Result;
-import com.cj.jshintmojo.jshint.JSHint;
+import com.cj.jshintmojo.jshint.JSHint.Hint;
 
 /**
  * CheckStyle style xml reporter class.
@@ -20,7 +20,7 @@ public class CheckStyleReporter implements JSHintReporter {
     public static final String FORMAT = "checkstyle";
 
     @Override
-    public String report(Map<String, Result> results) {
+    public String report(final Map<String, Result> results) {
         if(results == null){
             return "";
         }
@@ -33,9 +33,9 @@ public class CheckStyleReporter implements JSHintReporter {
         for(String file : files){
             Result result = results.get(file);
             buf.append ("\t<file name=\"").append (result.path).append ("\">\n");
-            for(JSHint.Error error : result.errors){
-                buf.append(String.format("\t\t<error line=\"%d\" column=\"%d\" message=\"%s\" source=\"jshint.%s\" severity=\"%s\" />\n",
-                        error.line.intValue(), error.character.intValue(), encode(error.reason), encode(error.code), severity(error.code)));
+            for (Hint hint : result.hints) {
+        		buf.append(String.format("\t\t<" + severity(hint.code) + " line=\"%d\" column=\"%d\" message=\"%s\" source=\"jshint.%s\" severity=\"%s\" />\n",
+        				hint.line.intValue(), hint.character.intValue(), encode(hint.reason), encode(hint.code), severity(hint.code)));
             }
             buf.append("\t</file>\n");
         }
@@ -44,22 +44,21 @@ public class CheckStyleReporter implements JSHintReporter {
         return buf.toString();
     }
     
-    private String severity(String errorCode) {
+    private String severity(final String errorCode) {
         if(StringUtils.isNotEmpty(errorCode)){
             switch(errorCode.charAt(0)){
             case 'E':
                 return "error";
+            case 'W':
+            	return "warning";
             case 'I':
                 return "info";
-            case 'W':
-            default:
-                break;
             }
         }
-        return "warning";
+        throw new IllegalArgumentException();
     }
     
-    private String encode(String str) {
+    private String encode(final String str) {
         if(str == null){
             return "";
         }

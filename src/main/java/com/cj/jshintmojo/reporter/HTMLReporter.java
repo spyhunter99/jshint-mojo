@@ -31,7 +31,7 @@ public class HTMLReporter implements JSHintReporter {
         for(String file : files){
             Result result = results.get(file);
             buf.append ("<h2>").append (result.path).append ("</h2>\n");
-            for(JSHint.Error issue : result.errors){
+            for(JSHint.Hint issue : result.hints){
                 buf.append(String.format("\t\t<div style=\"background-color:#2956B2;color:white;padding:4px\"><span style=\"padding-right:40px;padding-left:4px;\">line:%d char:%d</span><span style=\"font-weight:bold;padding-right:50px;\">%s</span></div><div style=\"margin-left:20px;margin-bottom:1em;font-size:11pt;font-family:consolas;\"><p>%s</p></div>",
                 		issue.line.intValue(), issue.character.intValue(), encode(issue.reason), encode(issue.evidence)));
             }
